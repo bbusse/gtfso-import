@@ -9,7 +9,7 @@ $ podman run -e DB_HOST=fdc7:a61d:d247::42 \
              -e DB_USER=gtfso \
              -e DB_NAME=gtfso \
              -e URL_DATA=https://www.vbb.de/vbbgtfs \
-             gtfso-import
+             ghcr.io/bbusse/gtfso-import:latest
 ```
 
 ## Build Container
