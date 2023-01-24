@@ -47,8 +47,10 @@ function psql_create_database() {
     user="${2}"
     local db
     db="${3}"
+    local locale
+    locale="${4}"
 
-    if ! createdb -U "${user}" -h "${host}" "${db}"; then
+    if ! createdb -U "${user}" -h "${host}" "${db}" -l "${locale}" -T template0; then
         printf "gtfso: Failed to create database\n"
     fi
 }
@@ -122,13 +124,31 @@ function main() {
     local t0
     t0=$(date +%s)
 
+    if [ -z ${DB_HOST+x} ]; then
+        printf "gtfso: Please specify the database host "
+        printf "to connect to via DB_HOST\nAborting.."
+        exit 1
+    fi
+
+    if [ -z ${DB_USER+x} ]; then
+        printf "gtfso: Please specify the database user "
+        printf "to connect with via DB_USER\nAborting.."
+        exit 1
+    fi
+
     if [ -z ${DB_NAME+x} ]; then
-        printf "gtfso: Please specify the database host to connect to via DB_NAME\nAborting.."
+        printf "gtfso: Please specify the database "
+        printf "to connect to via DB_NAME\nAborting.."
         exit 1
     fi
 
     printf "gtfso: Fetching gtfs data..\n"
     gtfs_fetch_data "${URL_DATA}" "${WORKDIR}"
+
+    # Set default locale if not given
+    if [ -z ${DB_LOCALE+x} ]; then
+        DB_LOCALE="de_DE.UTF-8"
+    fi
 
     if [ $DROP_DB -eq 1 ]; then
         printf "gtfso: Dropping database..\n"
@@ -141,10 +161,10 @@ function main() {
         printf "gtfso: Creating database..\n"
         psql_create_database "${DB_HOST}" \
                              "${DB_USER}" \
-                             "${DB_NAME}"
+                             "${DB_NAME}" \
+                             "${DB_LOCALE}"
     fi
 
-    printf "\n"
     printf "gtfso: Creating tables..\n"
     psql_run_sql "${DB_HOST}" \
                  "${DB_USER}" \
