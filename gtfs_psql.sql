@@ -64,8 +64,8 @@ CREATE TABLE IF NOT EXISTS stop_times (
 );
 
 CREATE TABLE IF NOT EXISTS transfers (
-    from_stop_id VARCHAR(32),
-    to_stop_id VARCHAR(32),
+    from_stop_id VARCHAR(25),
+    to_stop_id VARCHAR(25),
     transfer_type INT,
     min_transfer_time INT,
     from_route_id VARCHAR(32),

@@ -13,6 +13,7 @@ set -eo pipefail
 
 WORKDIR="/import"
 SQL_FILE="gtfs_psql.sql"
+SQL_FILE_ROUTE_TYPES="gtfs_route_types_psql.sql"
 CREATE_DB=1
 DROP_DB=0
 
@@ -172,6 +173,19 @@ function main() {
                  "${WORKDIR}"/"${SQL_FILE}" \
                  1
 
+    printf "Truncating: route_types\n"
+    psql_truncate_table "${DB_HOST}" \
+                        "${DB_USER}" \
+                        "${DB_NAME}" \
+                        "route_types"
+
+    # Create route_types table and import data
+    psql_run_sql "${DB_HOST}" \
+                 "${DB_USER}" \
+                 "${DB_NAME}" \
+                 "${WORKDIR}"/"${SQL_FILE_ROUTE_TYPES}" \
+                 1
+
     for file in "${CSV_FILES[@]}"; do
         local table
         table=${file%%.*}
@@ -180,7 +194,6 @@ function main() {
         psql_truncate_table "${DB_HOST}" \
                             "${DB_USER}" \
                             "${DB_NAME}" \
-                            "${table}"
 
         printf "Importing from: %s\n" "${file}"
         psql_import_csv "${DB_HOST}" \

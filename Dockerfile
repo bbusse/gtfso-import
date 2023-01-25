@@ -14,7 +14,7 @@ RUN apk update \
     && chown $USER /import
 
 # Add SQL
-COPY gtfs_psql.sql /import
+COPY gtfs_psql.sql gtfs_route_types_psql.sql /import
 
 # Add entrypoint
 USER $USER
