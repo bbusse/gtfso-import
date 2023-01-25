@@ -23,5 +23,5 @@ $ podman build -t gtfso-import .
 ## Resources
 https://en.wikipedia.org/wiki/GTFS  
 https://developers.google.com/transit/gtfs/reference/extended-route-types  
-[GTFS data for Berlin](://www.vbb.de/vbbgtfs)  
+[GTFS data for Berlin](https://www.vbb.de/vbbgtfs)  
 [GTFS data for Munich](https://www.mvg.de/static/gtfs/gtfs-mvg.zip)
