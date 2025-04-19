@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS agency (
 );
 
 CREATE TABLE IF NOT EXISTS calendar (
-    service_id INT,
+    service_id VARCHAR(50), -- Changed from INT to VARCHAR(50)
     monday SMALLINT,
     tuesday SMALLINT,
     wednesday SMALLINT,
@@ -21,14 +21,14 @@ CREATE TABLE IF NOT EXISTS calendar (
 );
 
 CREATE TABLE IF NOT EXISTS calendar_dates (
-    service_id INT,
+    service_id VARCHAR(50), -- Changed from INT to VARCHAR(50)
     date VARCHAR(8),
     exception_type INT
 );
 
 CREATE TABLE IF NOT EXISTS routes (
     route_id VARCHAR(12) PRIMARY KEY,
-    agency_id INT,
+    agency_id VARCHAR(20), -- Changed from INT to VARCHAR(20)
     route_short_name VARCHAR(10),
     route_long_name VARCHAR(32),
     route_type INT,
@@ -76,13 +76,13 @@ CREATE TABLE IF NOT EXISTS transfers (
 
 CREATE TABLE IF NOT EXISTS trips (
     route_id VARCHAR(25),
-    service_id INT,
+    service_id VARCHAR(50), -- Changed from INT to VARCHAR(50)
     trip_id VARCHAR(255) PRIMARY KEY,
     trip_headsign VARCHAR(255),
     trip_short_name VARCHAR(255),
     direction_id SMALLINT,
     block_id INT,
-    shape_id INT,
+    shape_id VARCHAR(50), -- Changed from INT to VARCHAR(50)
     wheelchair_accessible SMALLINT,
     bikes_allowed SMALLINT
 );
