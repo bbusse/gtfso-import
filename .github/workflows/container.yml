@@ -1,0 +1,28 @@
+name: Container Build and Release
+
+on:
+  push:
+    paths-ignore:
+      - '**.md'
+  pull_request:
+    paths-ignore:
+      - '**.md'
+  workflow_dispatch:
+
+jobs:
+  build-container:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image_name: 'gtfso-import'
+            image_tag: 'pre-release'
+            container_file: 'Containerfile'
+            image_platforms: linux/amd64, linux/arm64
+    uses: bbusse/github-workflows/.github/workflows/container-build-push.yaml@dev
+    with:
+      image_name: ${{ matrix.image_name }}
+      image_tag: ${{ matrix.image_tag }}
+      container_file: ${{ matrix.container_file }}
+      container_registry: 'ghcr'
+      container_push_to_registry: true
