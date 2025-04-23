@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS routes (
 );
 
 CREATE TABLE IF NOT EXISTS stops (
-    stop_id VARCHAR(25) PRIMARY KEY,
+    stop_id VARCHAR(50) PRIMARY KEY,
     stop_code VARCHAR(255),
     stop_name VARCHAR(255),
     stop_desc VARCHAR(255),
@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS stop_times (
     trip_id VARCHAR(255),
     arrival_time INTERVAL,
     departure_time INTERVAL,
-    stop_id VARCHAR(25),
+    stop_id VARCHAR(50),
     stop_sequence INT,
     pickup_type INT,
     drop_off_type INT,
@@ -64,8 +64,8 @@ CREATE TABLE IF NOT EXISTS stop_times (
 );
 
 CREATE TABLE IF NOT EXISTS transfers (
-    from_stop_id VARCHAR(25),
-    to_stop_id VARCHAR(25),
+    from_stop_id VARCHAR(50),
+    to_stop_id VARCHAR(50),
     transfer_type INT,
     min_transfer_time INT,
     from_route_id VARCHAR(32),
