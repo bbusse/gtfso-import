@@ -11,9 +11,10 @@
 
 set -eo pipefail
 
-WORKDIR="/import"
-SQL_FILE="gtfs_psql.sql"
-SQL_FILE_ROUTE_TYPES="gtfs_route_types_psql.sql"
+# Set WORKDIR only if it is not already set
+WORKDIR="${WORKDIR:-/import}"
+SQL_FILE="../gtfs_psql.sql"
+SQL_FILE_ROUTE_TYPES="../gtfs_route_types_psql.sql"
 CREATE_DB=1
 DROP_DB=0
 
@@ -36,7 +37,7 @@ function psql_drop_database() {
     local db
     db="${3}"
 
-    if ! psql -U "${user}" -h "${host}" -d "${db}" \
+    if ! PGPASSWORD="${DB_PASSWORD}" psql -U "${user}" -h "${host}" -d "${db}" \
               -c "DROP ${db} WITH (FORCE)"; then
         printf "gtfso: Failed to drop database\nAborting..\n"
         exit 1
@@ -53,7 +54,7 @@ function psql_create_database() {
     local locale
     locale="${4}"
 
-    if ! createdb -U "${user}" -h "${host}" "${db}" -l "${locale}" -T template0; then
+    if ! PGPASSWORD="${DB_PASSWORD}" createdb -U "${user}" -h "${host}" "${db}" -l "${locale}" -T template0; then
         printf "gtfso: Failed to create database\n"
     fi
 }
@@ -69,9 +70,9 @@ function psql_truncate_table() {
     local table
     table="${4}"
 
-    if ! psql -U "${user}" -h "${host}" -d "${db}" \
-              -c "TRUNCATE ${table}"; then
-        printf "gtfso: Failed to truncate table\nAborting..\n"
+    if ! PGPASSWORD="${DB_PASSWORD}" psql -U "${user}" -h "${host}" -d "${db}" \
+              -c "DO \$\$ BEGIN IF EXISTS (SELECT FROM information_schema.tables WHERE table_name = '${table}') THEN TRUNCATE ${table}; END IF; END \$\$;"; then
+        printf "gtfso: Failed to truncate table or table does not exist\nAborting..\n"
         exit 1
     fi
 }
@@ -88,7 +89,7 @@ function psql_import_csv() {
     local file
     file="${5}"
 
-    if ! psql -U "${user}" -h "${host}" -d "${db}" \
+    if ! PGPASSWORD="${DB_PASSWORD}" psql -U "${user}" -h "${host}" -d "${db}" \
               -c "\COPY ${table} FROM '${file}' WITH DELIMITER AS ',' CSV HEADER"; then
         printf "gtfso: Failed to import data from %s\n" "${file}"
         exit 1
@@ -105,7 +106,7 @@ function psql_run_sql() {
     local file
     file="${4}"
 
-    if ! psql -U "${user}" -h "${host}" -d "${db}" -a -f "${file}"; then
+    if ! PGPASSWORD="${DB_PASSWORD}" psql -U "${user}" -h "${host}" -d "${db}" -a -f "${file}"; then
         printf "gtfso: Failed to import data\n"
         exit 1
     fi
@@ -164,15 +165,15 @@ function main() {
         printf "gtfso: Creating database..\n"
         psql_create_database "${DB_HOST}" \
                              "${DB_USER}" \
-                             "${DB_NAME}" \
-                             "${DB_LOCALE}"
+                             "${DB_NAME}"
+                             #"${DB_LOCALE}"
     fi
 
     printf "gtfso: Creating tables..\n"
     psql_run_sql "${DB_HOST}" \
                  "${DB_USER}" \
                  "${DB_NAME}" \
-                 "${WORKDIR}"/"${SQL_FILE}" \
+                 "${SQL_FILE}" \
                  1
 
     printf "Truncating: route_types\n"
@@ -185,7 +186,7 @@ function main() {
     psql_run_sql "${DB_HOST}" \
                  "${DB_USER}" \
                  "${DB_NAME}" \
-                 "${WORKDIR}"/"${SQL_FILE_ROUTE_TYPES}" \
+                 "${SQL_FILE_ROUTE_TYPES}" \
                  1
 
     for file in "${CSV_FILES[@]}"; do
@@ -196,6 +197,7 @@ function main() {
         psql_truncate_table "${DB_HOST}" \
                             "${DB_USER}" \
                             "${DB_NAME}" \
+                            "${table}"
 
         printf "Importing from: %s\n" "${file}"
         psql_import_csv "${DB_HOST}" \
