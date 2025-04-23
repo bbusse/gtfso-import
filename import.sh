@@ -176,6 +176,38 @@ for arg in "$@"; do
     esac
 done
 
+function import_csv_files_parallel() {
+    local pids=()
+    for file in "${CSV_FILES[@]}"; do
+        local table
+        table=${file%%.*}
+
+        printf "Truncating: %s\n" "${table}"
+        psql_truncate_table "${DB_HOST}" \
+                            "${DB_USER}" \
+                            "${DB_NAME}" \
+                            "${table}" &
+
+        printf "Importing from: %s\n" "${file}"
+        psql_import_csv "${DB_HOST}" \
+                        "${DB_USER}" \
+                        "${DB_NAME}" \
+                        "${table}" \
+                        "${WORKDIR}/${file}" &
+        
+        # Collect the process ID
+        pids+=($!)
+    done
+
+    # Wait for all background processes to finish
+    for pid in "${pids[@]}"; do
+        wait "$pid" || {
+            printf "gtfso: A background process failed. Aborting...\n"
+            exit 1
+        }
+    done
+}
+
 function main() {
     check_required_tools
     check_required_env_vars
@@ -244,23 +276,8 @@ function main() {
                  "${SQL_FILE_ROUTE_TYPES}" \
                  1
 
-    for file in "${CSV_FILES[@]}"; do
-        local table
-        table=${file%%.*}
-
-        printf "Truncating: %s\n" "${table}"
-        psql_truncate_table "${DB_HOST}" \
-                            "${DB_USER}" \
-                            "${DB_NAME}" \
-                            "${table}"
-
-        printf "Importing from: %s\n" "${file}"
-        psql_import_csv "${DB_HOST}" \
-                        "${DB_USER}" \
-                        "${DB_NAME}" \
-                        "${table}" \
-                        "${WORKDIR}/${file}"
-    done
+    printf "gtfso: Importing CSV files in parallel...\n"
+    import_csv_files_parallel
 
     t_duration=$(($(date +%s) - t0))
 
