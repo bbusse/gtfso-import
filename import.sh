@@ -11,12 +11,12 @@
 
 set -eo pipefail
 
-# Set WORKDIR only if it is not already set
+# Allow overriding settings via environment variables
+CREATE_DB="${CREATE_DB:-1}"
+DROP_DB="${DROP_DB:-0}"
+SQL_FILE="${SQL_FILE:-../gtfs_psql.sql}"
+SQL_FILE_ROUTE_TYPES="${SQL_FILE_ROUTE_TYPES:-../gtfs_route_types_psql.sql}"
 WORKDIR="${WORKDIR:-/import}"
-SQL_FILE="../gtfs_psql.sql"
-SQL_FILE_ROUTE_TYPES="../gtfs_route_types_psql.sql"
-CREATE_DB=1
-DROP_DB=0
 
 export PGPASSWORD="$DB_PASS"
 
@@ -208,9 +208,34 @@ function import_csv_files_parallel() {
     done
 }
 
+function validate_inputs() {
+    if [ ! -d "${WORKDIR}" ]; then
+        printf "gtfso: Working directory '%s' does not exist. Aborting...\n" "${WORKDIR}"
+        exit 1
+    fi
+
+    if [ ! -f "${SQL_FILE}" ]; then
+        printf "gtfso: SQL file '%s' not found. Aborting...\n" "${SQL_FILE}"
+        exit 1
+    fi
+
+    if [ ! -f "${SQL_FILE_ROUTE_TYPES}" ]; then
+        printf "gtfso: SQL file '%s' not found. Aborting...\n" "${SQL_FILE_ROUTE_TYPES}"
+        exit 1
+    fi
+
+    for file in "${CSV_FILES[@]}"; do
+        if [ ! -f "${WORKDIR}/${file}" ]; then
+            printf "gtfso: CSV file '%s' not found in '%s'. Aborting...\n" "${file}" "${WORKDIR}"
+            exit 1
+        fi
+    done
+}
+
 function main() {
     check_required_tools
     check_required_env_vars
+    validate_inputs
 
     local t0
     t0=$(date +%s)
