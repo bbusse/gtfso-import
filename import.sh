@@ -121,7 +121,7 @@ function gtfs_fetch_data() {
     curl -LO -s -S --fail --output-dir "${path}" "${url}"
 
     printf "gtfso: Extracting data..\n"
-    unzip -q -d "${path}" "${path}"/vbbgtfs
+    unzip -oq -d "${path}" "${path}"/vbbgtfs # Added '-o' to overwrite existing files
 }
 
 function check_required_tools() {
