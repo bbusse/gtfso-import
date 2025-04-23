@@ -2,6 +2,21 @@
 
 Import gtfs data into PostgreSQL
 
+## Use `import.sh` Directly
+Make sure the required tools (`psql`, `curl`, `unzip`) are installed and the PostgreSQL host is accessible
+
+### Example Usage
+```
+$ git clone https://github.com/bbusse/gtfso-import
+$ cd gtfso-import
+$ DB_HOST=fdc7:a61d:d247::42 \
+  DB_USER=gtfso \
+  DB_NAME=gtfso \
+  DB_LOCALE=de_DE.UTF-8 \
+  URL_DATA=https://www.vbb.de/vbbgtfs \
+  bash import.sh
+```
+
 ## Use Container
 Make sure the PostgreSQL host is accessible from the container
 ```
