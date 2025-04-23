@@ -144,6 +144,38 @@ function check_required_env_vars() {
     done
 }
 
+function print_help() {
+    printf "Usage: %s [options]\n" "$(basename "$0")"
+    printf "Options:\n"
+    printf "  --help          Show this help message\n"
+    printf "  --workdir DIR   Set the working directory (default: /import)\n"
+    printf "  --drop-db       Drop the database before importing\n"
+    printf "  --no-create-db  Skip database creation\n"
+    exit 0
+}
+
+# Parse command-line arguments
+for arg in "$@"; do
+    case $arg in
+        --help)
+            print_help
+            ;;
+        --workdir=*)
+            WORKDIR="${arg#*=}"
+            ;;
+        --drop-db)
+            DROP_DB=1
+            ;;
+        --no-create-db)
+            CREATE_DB=0
+            ;;
+        *)
+            printf "Unknown option: %s\n" "$arg"
+            print_help
+            ;;
+    esac
+done
+
 function main() {
     check_required_tools
     check_required_env_vars
