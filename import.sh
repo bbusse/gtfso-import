@@ -18,7 +18,7 @@ SQL_FILE_ROUTE_TYPES="../gtfs_route_types_psql.sql"
 CREATE_DB=1
 DROP_DB=0
 
-PGPASSWORD="$DB_PASS"
+export PGPASSWORD="$DB_PASS"
 
 declare -a CSV_FILES=("agency.txt" \
                       "calendar.txt" \
