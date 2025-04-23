@@ -134,8 +134,19 @@ function check_required_tools() {
     done
 }
 
+function check_required_env_vars() {
+    local required_vars=("DB_HOST" "DB_USER" "DB_NAME" "DB_PASSWORD")
+    for var in "${required_vars[@]}"; do
+        if [ -z "${!var}" ]; then
+            printf "gtfso: Required environment variable '%s' is not set. Aborting...\n" "${var}"
+            exit 1
+        fi
+    done
+}
+
 function main() {
     check_required_tools
+    check_required_env_vars
 
     local t0
     t0=$(date +%s)
