@@ -124,7 +124,19 @@ function gtfs_fetch_data() {
     unzip -q -d "${path}" "${path}"/vbbgtfs
 }
 
+function check_required_tools() {
+    local tools=("psql" "createdb" "curl" "unzip")
+    for tool in "${tools[@]}"; do
+        if ! command -v "${tool}" &> /dev/null; then
+            printf "gtfso: Required tool '%s' is not installed. Aborting...\n" "${tool}"
+            exit 1
+        fi
+    done
+}
+
 function main() {
+    check_required_tools
+
     local t0
     t0=$(date +%s)
 
